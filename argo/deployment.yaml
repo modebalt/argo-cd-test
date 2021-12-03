@@ -1,27 +1,37 @@
-apiVersion: argoproj.io/v1alpha1 # Changed from apps/v1
-kind: Rollout # Changed from Deployment
-# --- Everything below this comment is the same as a deployment ---
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
-  name: example-rollout
+  name: rollouts-demo
 spec:
-  replicas: 1
+  replicas: 5
+  strategy:
+    canary:
+      steps:
+      - setWeight: 20
+      - pause: {}
+      - setWeight: 40
+      - pause: {duration: 10}
+      - setWeight: 60
+      - pause: {duration: 10}
+      - setWeight: 80
+      - pause: {duration: 10}
+  revisionHistoryLimit: 2
   selector:
     matchLabels:
-     app: nginx
+      app: rollouts-demo
   template:
     metadata:
       labels:
-        app: nginx
+        app: rollouts-demo
     spec:
       containers:
-      - name: nginx
-        image: nginx:1.15.4
-    ports:
-    - containerPort: 80
-  minReadySeconds: 30
-  revisionHistoryLimit: 3
-  strategy:
-# --- Everything above this comment are the same as a deployment ---
-    blueGreen: # A new field for the Blue Green strategy options
-      previewService: my-service-preview # Reference to a service
-      activeService: my-service-active # Reference to a service
+      - name: rollouts-demo
+        image: argoproj/rollouts-demo:blue
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        resources:
+          requests:
+            memory: 32Mi
+            cpu: 5m
