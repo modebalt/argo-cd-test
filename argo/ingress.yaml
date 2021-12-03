@@ -11,6 +11,7 @@ spec:
       paths:
       - path: /
         backend:
+          service:
           # Reference to a Service name, also specified in the Rollout spec.strategy.canary.stableService field
-          serviceName: rollouts-demo-stable
-          servicePort: 80
+            name: rollouts-demo-stable
+            port: 80
